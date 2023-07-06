@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProviderType {
+  LOCAL
+  KAKAO
+}
+
+model User {
+  id         String       @id @default(cuid())
+  name       String
+  email      String       @unique
+  phone      String?
+  password   String?
+  image      String?
+  provider   ProviderType @default(LOCAL)
+  snsId      String?
+  role       Int          @default(0) @db.SmallInt
+  isVerified Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+
+  token       Token[]
+  reservation Reservation[]
+
+  @@index([id, email])
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  payload   String
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Reservation {
+  id        String  @id @default(cuid())
+  personAmt Int
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id])
+
+  movieScheduleId String        @unique
+  movieSchedule   MovieSchedule @relation(fields: [movieScheduleId], references: [id])
+
+  screenId String @unique
+  screen   Screen @relation(fields: [screenId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model MovieSchedule {
+  id      String @id @default(uuid())
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+
+  screenId String  @unique
+  screen   Screen? @relation(fields: [screenId], references: [id])
+
+  startTm String
+  endTm   String
+
+  reservation Reservation[]
+}
+
+model Movie {
+  adult             Boolean
+  backdrop_path     String?
+  id                String   @id
+  original_language String
+  original_title    String
+  overview          String
+  popularity        Float    @db.Real
+  poster_path       String?
+  release_date      String
+  title             String   @unique
+  vote_average      Float    @db.Real
+  vote_count        Int
+  genres            String[]
+  runtime           Int      @db.SmallInt
+
+  movieSchedule MovieSchedule[]
+
+  @@index([id])
+}
+
+model Screen {
+  id        String @id @default(cuid())
+  screenNum Int
+  seatAmt   Int
+
+  movieSchedule MovieSchedule?
+  reservation   Reservation[]
+  seat          Seat[]
+}
+
+model Seat {
+  id       String  @id @default(cuid())
+  name     String
+  screenId String?
+  screen   Screen? @relation(fields: [screenId], references: [id])
+}
