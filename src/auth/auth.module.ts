@@ -14,7 +14,7 @@ import { KakaoStrategy } from './strategy/kakao.strategy';
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secret',
+      secret: 'secret',
       signOptions: { expiresIn: '7d' },
     }),
     EmailModule,

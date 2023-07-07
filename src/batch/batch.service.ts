@@ -15,7 +15,7 @@ import { catchError, firstValueFrom, map } from 'rxjs';
 import movieConfig from 'src/config/movie.config';
 import { logDir } from 'src/logger/logger.module';
 import { CreateMovieDto } from 'src/movie/dto/create-movie.dto';
-import { MovieService } from '../movie/movie.service';
+import { MoviesService } from '../movie/movies.service';
 
 interface ICollection {
   id: number;
@@ -60,7 +60,7 @@ export class BatchService {
     private readonly logger: LoggerService,
     @Inject(movieConfig.KEY) private config: ConfigType<typeof movieConfig>,
     private readonly httpService: HttpService,
-    private readonly movieService: MovieService,
+    private readonly moviesService: MoviesService,
   ) {
     this.MOVIE_API_BASE_URL = 'https://api.themoviedb.org/3';
     this.MOVIE_API_KEY = config.movieApi;
@@ -135,7 +135,7 @@ export class BatchService {
         } as CreateMovieDto),
     );
 
-    await this.movieService.refreshEveryday(payload, startDateStr);
+    await this.moviesService.refreshEveryday(payload, startDateStr);
     this.logger.log(`${todayStr} | 영화 정보 업데이트 완료.`);
     return data;
   }

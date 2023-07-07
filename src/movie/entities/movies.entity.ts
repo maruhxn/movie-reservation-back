@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Movie } from '@prisma/client';
 
 export class MovieEntity implements Movie {
+  constructor(partial: Partial<MovieEntity>) {
+    Object.assign(this, partial);
+  }
   @ApiProperty({
     description: '고유 아이디',
   })

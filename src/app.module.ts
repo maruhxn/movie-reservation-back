@@ -10,7 +10,7 @@ import movieConfig from './config/movie.config';
 import { ExceptionModule } from './exception/exception.module';
 import { ConfigValidationSchhma } from './lib/schemas/config.schema';
 import { LoggerModule } from './logger/logger.module';
-import { MovieModule } from './movie/movie.module';
+import { MoviesModule } from './movie/movies.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 
@@ -26,7 +26,7 @@ import { UsersModule } from './users/users.module';
     ExceptionModule,
     LoggerModule,
     BatchModule,
-    MovieModule,
+    MoviesModule,
     PrismaModule,
     UsersModule,
   ],

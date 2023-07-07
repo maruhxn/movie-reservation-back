@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { BaseResponse } from 'src/types/response/base-response.dto';
 import { UsersService } from './../users/users.service';
 
 import { ConfigType } from '@nestjs/config';
@@ -16,12 +15,11 @@ import { Request, Response } from 'express';
 import authConfig from 'src/config/auth.config';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginResponse } from 'src/types/response/auth/login.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import * as uuid from 'uuid';
+import { UserInfo } from '../types/user-info';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { UserInfo } from './user-info';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +35,7 @@ export class AuthService {
     this.CLIENT_URL = config.clientUrl;
   }
 
-  async register(createUserDto: CreateUserDto): Promise<BaseResponse> {
+  async register(createUserDto: CreateUserDto): Promise<void> {
     const exUser = await this.prisma.user.findFirst({
       where: {
         OR: [
@@ -56,7 +54,7 @@ export class AuthService {
 
     await this.saveUser(createUserDto, signupVerifyToken);
     await this.sendMemberJoinEmail(createUserDto.email, signupVerifyToken);
-    return { ok: true, status: 201, msg: '회원가입 성공' };
+    return;
   }
 
   private async saveUser(
@@ -79,7 +77,7 @@ export class AuthService {
     );
   }
 
-  async verifyEmail(verifyEmailDto: VerifyEmailDto): Promise<LoginResponse> {
+  async verifyEmail(verifyEmailDto: VerifyEmailDto): Promise<string> {
     const { signupVerifyToken } = verifyEmailDto;
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
@@ -99,11 +97,7 @@ export class AuthService {
 
     await this.usersService.update(token.userId, { isVerified: true });
 
-    const payload: UserInfo = {
-      userId: token.userId,
-      name: token.user.name,
-      email: token.user.email,
-    };
+    const payload = { userId: token.userId };
     await this.prisma.token.deleteMany({
       where: {
         userId: token.userId,
@@ -111,15 +105,10 @@ export class AuthService {
     });
     const accessToken = this.jwtService.sign(payload);
 
-    return {
-      ok: true,
-      status: 201,
-      msg: '이메일 인증 성공',
-      data: { accessToken },
-    };
+    return accessToken;
   }
 
-  async login(loginDto: LoginDto): Promise<LoginResponse> {
+  async login(loginDto: LoginDto): Promise<string> {
     const { email, password } = loginDto;
     const user = await this.prisma.user.findFirst({
       where: {
@@ -128,25 +117,15 @@ export class AuthService {
       },
     });
 
-    console.log(user);
-
     if (!user) throw new NotFoundException('유저 정보가 존재하지 않습니다.');
 
     const isValid = await compare(password, user.password);
     if (isValid) {
-      const payload: UserInfo = {
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-      };
+      const payload = { userId: user.id };
+
       const accessToken = this.jwtService.sign(payload);
 
-      return {
-        ok: true,
-        status: 201,
-        msg: '로그인 성공',
-        data: { accessToken },
-      };
+      return accessToken;
     } else {
       throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
     }
@@ -156,25 +135,8 @@ export class AuthService {
     return res.redirect(`${this.CLIENT_URL}/?accessToken=${accessToken}`);
   }
 
-  async deleteUser(user: UserInfo): Promise<BaseResponse> {
-    const exUser = await this.prisma.user.findFirst({
-      where: { id: user.userId },
-    });
-
-    if (!exUser) {
-      throw new NotFoundException('유저가 존재하지 않습니다');
-    }
-
-    await this.prisma.user.delete({
-      where: {
-        id: exUser.id,
-      },
-    });
-
-    return {
-      ok: true,
-      msg: `${exUser.name}(${exUser.id}) - 회원 탈퇴`,
-      status: 201,
-    };
+  async deleteUser(user: UserInfo): Promise<void> {
+    await this.usersService.remove(user.id);
+    return;
   }
 }

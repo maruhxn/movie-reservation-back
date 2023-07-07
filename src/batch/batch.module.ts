@@ -1,11 +1,11 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { MovieModule } from 'src/movie/movie.module';
+import { MoviesModule } from 'src/movie/movies.module';
 import { BatchService } from './batch.service';
 
 @Module({
-  imports: [HttpModule, ScheduleModule.forRoot(), MovieModule],
+  imports: [HttpModule, ScheduleModule.forRoot(), MoviesModule],
   providers: [BatchService],
 })
 export class BatchModule {}

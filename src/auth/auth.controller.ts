@@ -19,11 +19,11 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoginResponse } from 'src/types/response/auth/login.dto';
 import { BaseResponse } from 'src/types/response/base-response.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UserInfo } from '../types/user-info';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { UserInfo } from './user-info';
 
 @ApiTags('AUTH')
 @Controller('auth')
@@ -44,7 +44,8 @@ export class AuthController {
   @Post('')
   async register(@Body() dto: CreateUserDto): Promise<BaseResponse> {
     this.logger.log(`회원가입. Payload: ${JSON.stringify(dto)}`);
-    return await this.authService.register(dto);
+    await this.authService.register(dto);
+    return { ok: true, status: 201, msg: '회원가입 성공' };
   }
 
   @ApiOperation({ summary: '이메일 인증' })
@@ -56,7 +57,13 @@ export class AuthController {
   })
   @Post('email-verify')
   async verifyEmail(@Query() dto: VerifyEmailDto): Promise<LoginResponse> {
-    return await this.authService.verifyEmail(dto);
+    const accessToken = await this.authService.verifyEmail(dto);
+    return {
+      ok: true,
+      status: 201,
+      msg: '이메일 인증 성공',
+      data: { accessToken },
+    };
   }
 
   @ApiOperation({ summary: '로그인' })
@@ -69,7 +76,13 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto): Promise<LoginResponse> {
     this.logger.log(`로그인. Payload: ${JSON.stringify(dto)}`);
-    return await this.authService.login(dto);
+    const accessToken = await this.authService.login(dto);
+    return {
+      ok: true,
+      status: 201,
+      msg: '로그인 성공',
+      data: { accessToken },
+    };
   }
 
   @ApiOperation({ summary: '카카오 로그인' })
@@ -103,7 +116,12 @@ export class AuthController {
   @Delete('edit/delete')
   @UseGuards(AuthGuard())
   async deleteUser(@GetUser() user: UserInfo): Promise<BaseResponse> {
-    this.logger.log(`회원 탈퇴 - ${user.name}(${user.userId})}`);
-    return this.authService.deleteUser(user);
+    this.logger.log(`회원 탈퇴 - ${user.name}(${user.id})}`);
+    await this.authService.deleteUser(user);
+    return {
+      ok: true,
+      msg: `${user.name}(${user.id}) - 회원 탈퇴`,
+      status: 201,
+    };
   }
 }

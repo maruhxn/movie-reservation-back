@@ -33,7 +33,7 @@ export class CreateMovieDto {
     description: '배경이미지',
   })
   @IsString()
-  backdrop_path: string;
+  backdrop_path?: string;
 
   @ApiProperty({
     description: '오리지널 언어',
@@ -67,7 +67,7 @@ export class CreateMovieDto {
     description: '포스터 이미지',
   })
   @IsString()
-  poster_path: string;
+  poster_path?: string;
 
   @ApiProperty({
     description: '개봉일자',
