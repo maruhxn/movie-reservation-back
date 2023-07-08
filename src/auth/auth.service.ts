@@ -6,6 +6,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UsersService } from './../users/users.service';
+import { TokenRepository } from './repository/token.repository';
 
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -29,6 +30,7 @@ export class AuthService {
     private emailService: EmailService,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private tokenRepository: TokenRepository,
     @Inject(authConfig.KEY)
     private config: ConfigType<typeof authConfig>,
   ) {
@@ -36,18 +38,15 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto): Promise<void> {
-    const exUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: createUserDto.email },
-          { name: createUserDto.name },
-          { phone: createUserDto.phone },
-        ],
-      },
-    });
+    const exUser = await this.usersService.findUserOnRegister(
+      createUserDto.email,
+      createUserDto.name,
+      createUserDto.phone,
+    );
+
     if (exUser)
       throw new UnprocessableEntityException(
-        '해당 이메일 또는 이름으로는 가입할 수 없습니다.',
+        '해당 이메일, 전화번호 또는 이름으로는 가입할 수 없습니다.',
       );
 
     const signupVerifyToken = uuid.v1();
@@ -62,12 +61,7 @@ export class AuthService {
     signupVerifyToken: string,
   ): Promise<void> {
     const user = await this.usersService.create(createUserDto);
-    await this.prisma.token.create({
-      data: {
-        payload: signupVerifyToken,
-        userId: user.id,
-      },
-    });
+    await this.tokenRepository.createWithUserId(signupVerifyToken, user.id);
   }
 
   private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {

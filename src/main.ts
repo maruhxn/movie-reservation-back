@@ -13,7 +13,7 @@ async function bootstrap() {
     app.use(helmet({ contentSecurityPolicy: false }));
   const port = process.env.PORT || 8000;
   app.enableCors({ origin: 'http://localhost:3000', credentials: true });
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);

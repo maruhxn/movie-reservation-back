@@ -135,8 +135,13 @@ export class BatchService {
         } as CreateMovieDto),
     );
 
-    await this.moviesService.refreshEveryday(payload, startDateStr);
-    this.logger.log(`${todayStr} | 영화 정보 업데이트 완료.`);
+    const deletedCount = await this.moviesService.refreshEveryday(
+      payload,
+      startDateStr,
+    );
+    this.logger.log(
+      `영화 정보 업데이트 성공(${new Date().toISOString()}) - 삭제: ${deletedCount}`,
+    );
     return data;
   }
 

@@ -1,37 +1,35 @@
-import { Inject, Injectable, LoggerService } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { FilterDto } from './dto/filter.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { MovieEntity } from './entities/movies.entity';
+import { MoviesRepository } from './repository/movies.repository';
 
 @Injectable()
 export class MoviesService {
   constructor(
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: LoggerService,
-    private prisma: PrismaService,
+    private moviesRepository: MoviesRepository,
   ) {}
 
   async refreshEveryday(
-    createMovieDto: CreateMovieDto[],
+    createMovieDtos: CreateMovieDto[],
     startDateStr: string,
   ) {
     // release-date가 startDate보다 작은 경우, movie 삭제
-    const deleted = await this.prisma.movie.deleteMany({
+    const deleted = await this.moviesRepository.deleteMany({
       where: {
         release_date: {
           lt: startDateStr,
         },
       },
     });
-    this.logger.log('Out Dated', deleted.count);
 
     // 이미 movieId에 해당하는 movie가 존재한다면 create X, 없다면 create
 
-    createMovieDto.map(async (movieDto) => {
-      await this.prisma.movie.upsert({
+    createMovieDtos.map(async (movieDto) => {
+      await this.moviesRepository.upsert({
         where: {
           id: movieDto.id,
         },
@@ -40,13 +38,11 @@ export class MoviesService {
       });
     });
 
-    return this.logger.log('영화 정보 업데이트 성공', new Date().toISOString());
+    return deleted.count;
   }
 
   async create(createMovieDto: CreateMovieDto) {
-    const movie = await this.prisma.movie.create({
-      data: createMovieDto,
-    });
+    const movie = await this.moviesRepository.create({ data: createMovieDto });
 
     return new MovieEntity(movie);
   }
@@ -57,7 +53,7 @@ export class MoviesService {
     const orderBy = {
       [condition]: sort,
     };
-    const movies = await this.prisma.movie.findMany({
+    const movies = await this.moviesRepository.findMany({
       orderBy,
     });
 
@@ -65,7 +61,7 @@ export class MoviesService {
   }
 
   async findOne(id: string) {
-    const movie = await this.prisma.movie.findUnique({
+    const movie = await this.moviesRepository.findUnique({
       where: {
         id,
       },
@@ -75,7 +71,7 @@ export class MoviesService {
   }
 
   async update(id: string, updateMovieDto: UpdateMovieDto) {
-    const movie = await this.prisma.movie.update({
+    const movie = await this.moviesRepository.update({
       where: { id },
       data: updateMovieDto,
     });
@@ -84,7 +80,7 @@ export class MoviesService {
   }
 
   async remove(id: string) {
-    const movie = await this.prisma.movie.delete({
+    const movie = await this.moviesRepository.delete({
       where: { id },
     });
 
