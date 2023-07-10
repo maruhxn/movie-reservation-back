@@ -1,15 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MovieController } from './movies.controller';
+import { LoggerModule } from 'src/logger/logger.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { MoviesController } from './movies.controller';
+import { MoviesService } from './movies.service';
+import { MoviesRepository } from './repository/movies.repository';
 
-describe('MovieController', () => {
-  let controller: MovieController;
+describe('MoviesController', () => {
+  let controller: MoviesController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MovieController],
+      imports: [LoggerModule, PrismaModule],
+      controllers: [MoviesController],
+      providers: [MoviesService, MoviesRepository],
     }).compile();
 
-    controller = module.get<MovieController>(MovieController);
+    controller = module.get<MoviesController>(MoviesController);
   });
 
   it('should be defined', () => {

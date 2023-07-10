@@ -13,11 +13,12 @@ import { LoggerModule } from './logger/logger.module';
 import { MoviesModule } from './movie/movies.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
+import { ScreenModule } from './screen/screen.module';
+import { SeatsModule } from './seats/seats.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`${__dirname}/.env.${process.env.NODE_ENV}`],
       load: [emailConfig, authConfig, movieConfig],
       isGlobal: true,
       validationSchema: ConfigValidationSchhma,
@@ -29,6 +30,8 @@ import { UsersModule } from './users/users.module';
     MoviesModule,
     PrismaModule,
     UsersModule,
+    ScreenModule,
+    SeatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

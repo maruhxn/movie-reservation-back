@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProviderType, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UserInfo } from 'src/types/user-info';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -33,9 +33,6 @@ export class UsersService {
 
   async findOne(id: string): Promise<UserInfo> {
     const user = await this.usersRepository.findUnique({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('유저가 존재하지 않습니다');
-    }
     const { password, ...result } = user;
     return result as UserInfo;
   }
@@ -50,20 +47,8 @@ export class UsersService {
         OR: [{ email }, { name }, { phone }],
       },
     });
+
     return exUser;
-  }
-
-  async findWithEmail(email: string): Promise<User> {
-    const user = await this.usersRepository.findFirst({
-      where: {
-        email,
-        provider: ProviderType.LOCAL,
-      },
-    });
-
-    if (!user) throw new NotFoundException('유저 정보가 존재하지 않습니다.');
-
-    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserInfo> {
@@ -78,6 +63,10 @@ export class UsersService {
       data: updateUserDto,
     });
 
+    if (!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다');
+    }
+
     const { password, ...result } = user;
 
     return result as UserInfo;
@@ -85,6 +74,10 @@ export class UsersService {
 
   async remove(id: string): Promise<UserInfo> {
     const user = await this.usersRepository.delete({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다');
+    }
 
     const { password, ...result } = user;
 

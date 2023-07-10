@@ -7,7 +7,6 @@ import {
   InternalServerErrorException,
   LoggerService,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
@@ -22,14 +21,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
 
-    if (
-      !(exception instanceof HttpException) &&
-      !(exception instanceof Prisma.PrismaClientKnownRequestError)
-    ) {
+    console.log(exception);
+
+    if (!(exception instanceof HttpException)) {
       exception = new InternalServerErrorException('서버 에러 발생');
     }
 
-    console.log(exception);
     const response = (exception as HttpException).getResponse();
     const stack = exception.stack;
 

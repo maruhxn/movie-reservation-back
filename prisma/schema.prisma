@@ -39,7 +39,7 @@ model Token {
   payload   String
   createdAt DateTime @default(now())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Reservation {
@@ -49,10 +49,12 @@ model Reservation {
   user      User?   @relation(fields: [userId], references: [id])
 
   movieScheduleId String        @unique
-  movieSchedule   MovieSchedule @relation(fields: [movieScheduleId], references: [id])
+  movieSchedule   MovieSchedule @relation(fields: [movieScheduleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   screenId String @unique
   screen   Screen @relation(fields: [screenId], references: [id])
+
+  seat Seat[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -63,13 +65,14 @@ model Reservation {
 model MovieSchedule {
   id      String @id @default(uuid())
   movieId String
-  movie   Movie  @relation(fields: [movieId], references: [id])
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   screenId String  @unique
-  screen   Screen? @relation(fields: [screenId], references: [id])
+  screen   Screen? @relation(fields: [screenId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
-  startTm String
-  endTm   String
+  startDate String
+  startTm   String
+  endTm     String
 
   reservation Reservation[]
 }
@@ -97,7 +100,7 @@ model Movie {
 
 model Screen {
   id        String @id @default(cuid())
-  screenNum Int
+  screenNum Int @unique
   seatAmt   Int
 
   movieSchedule MovieSchedule?
@@ -106,8 +109,12 @@ model Screen {
 }
 
 model Seat {
-  id       String  @id @default(cuid())
-  name     String
+  id   String @id @default(cuid())
+  name String
+
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   screenId String?
-  screen   Screen? @relation(fields: [screenId], references: [id])
+  screen   Screen? @relation(fields: [screenId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

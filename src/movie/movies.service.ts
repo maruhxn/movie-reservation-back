@@ -1,5 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { Injectable } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { FilterDto } from './dto/filter.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -8,10 +7,7 @@ import { MoviesRepository } from './repository/movies.repository';
 
 @Injectable()
 export class MoviesService {
-  constructor(
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private moviesRepository: MoviesRepository,
-  ) {}
+  constructor(private moviesRepository: MoviesRepository) {}
 
   async refreshEveryday(
     createMovieDtos: CreateMovieDto[],

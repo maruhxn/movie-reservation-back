@@ -25,7 +25,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
-@ApiTags('AUTH')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(

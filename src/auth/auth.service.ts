@@ -56,7 +56,7 @@ export class AuthService {
     return;
   }
 
-  private async saveUser(
+  async saveUser(
     createUserDto: CreateUserDto,
     signupVerifyToken: string,
   ): Promise<void> {
@@ -64,7 +64,7 @@ export class AuthService {
     await this.tokenRepository.createWithUserId(signupVerifyToken, user.id);
   }
 
-  private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
+  async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
     return await this.emailService.sendMemberJoinVerification(
       email,
       signupVerifyToken,
