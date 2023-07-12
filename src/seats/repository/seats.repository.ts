@@ -8,41 +8,53 @@ import { UpdateSeatDto } from '../dto/update-seat.dto';
 export class SeatsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(params: { data: CreateSeatDto }) {
-    const { data } = params;
-    return await this.prisma.seat.create({
-      data,
-    });
+  async create(createSeatDto: CreateSeatDto) {
+    return await this.prisma.seat.create({ data: createSeatDto });
   }
 
-  async createMany(params: { data: CreateSeatDto[] }) {
-    const { data } = params;
-    return await this.prisma.seat.createMany({
-      data,
-    });
+  async createMany(createSeatDtos: CreateSeatDto[]) {
+    return await this.prisma.seat.createMany({ data: createSeatDtos });
   }
 
-  async findMany(params?: Prisma.SeatFindManyArgs) {
+  async findManyWithNames(difference: number) {
+    const seatIds = await this.prisma.seat.findMany({
+      orderBy: {
+        name: 'desc',
+      },
+      select: {
+        id: true,
+      },
+      take: Math.abs(difference),
+    });
+    return seatIds;
+  }
+
+  async findAll(params?: Prisma.SeatFindManyArgs) {
     return await this.prisma.seat.findMany(params);
   }
 
-  async findFirst(params: Prisma.SeatFindFirstArgs) {
-    return await this.prisma.seat.findFirst(params);
+  async findById(id: string) {
+    return await this.prisma.seat.findUnique({ where: { id } });
   }
 
-  async findUnique(params: Prisma.SeatFindUniqueArgs) {
-    return await this.prisma.seat.findUnique(params);
+  async update(id: string, updateSeatDto: UpdateSeatDto) {
+    return await this.prisma.seat.update({
+      where: { id },
+      data: updateSeatDto,
+    });
   }
 
-  async update(params: {
-    where: Prisma.SeatWhereUniqueInput;
-    data: UpdateSeatDto;
-  }) {
-    const { where, data } = params;
-    return await this.prisma.seat.update({ where, data });
+  async deleteById(id: string) {
+    return await this.prisma.seat.delete({
+      where: { id },
+    });
   }
 
-  async delete(params: Prisma.SeatDeleteArgs) {
-    return await this.prisma.seat.delete(params);
+  async deleteManyById(ids: string[]) {
+    return await this.prisma.seat.deleteMany({
+      where: {
+        id: { in: ids },
+      },
+    });
   }
 }

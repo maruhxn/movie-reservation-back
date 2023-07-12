@@ -1,8 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { UserInfo } from 'src/types/user-info';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 export const GetUser = createParamDecorator(
-  (data, ctx: ExecutionContext): UserInfo => {
+  (data, ctx: ExecutionContext): UserEntity => {
     const req = ctx.switchToHttp().getRequest();
     return req.user;
   },

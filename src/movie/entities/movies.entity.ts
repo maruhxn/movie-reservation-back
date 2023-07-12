@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Movie } from '@prisma/client';
+import { MoviescheduleEntity } from './../../movieschedules/entities/movieschedule.entity';
 
 export class MovieEntity implements Movie {
-  constructor(partial: Partial<MovieEntity>) {
-    Object.assign(this, partial);
+  constructor({ movieSchedules, ...data }: Partial<MovieEntity>) {
+    Object.assign(this, data);
+
+    if (movieSchedules) this.movieSchedules = movieSchedules;
   }
   @ApiProperty({
     description: '고유 아이디',
@@ -74,4 +77,11 @@ export class MovieEntity implements Movie {
     description: '런타임',
   })
   runtime: number;
+
+  @ApiProperty({
+    nullable: true,
+    required: false,
+    description: '영화 스케쥴 리스트',
+  })
+  movieSchedules?: MoviescheduleEntity[];
 }

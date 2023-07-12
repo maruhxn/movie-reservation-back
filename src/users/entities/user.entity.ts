@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProviderType, User } from '@prisma/client';
+import { Exclude } from 'class-transformer';
+import { ReservationEntity } from 'src/reservations/entities/reservation.entity';
 export class UserEntity implements User {
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
+  constructor({ reservations, ...data }: Partial<UserEntity>) {
+    Object.assign(this, data);
+    if (reservations)
+      this.reservations = reservations.map(
+        (reservation) => new ReservationEntity(reservation),
+      );
   }
   @ApiProperty({
     description: '고유 유저 아이디',
@@ -25,6 +31,7 @@ export class UserEntity implements User {
   @ApiProperty({
     description: '유저 비밀번호, OAuth 로그인 시 null',
   })
+  @Exclude()
   password: string | null;
 
   @ApiProperty({
@@ -56,4 +63,11 @@ export class UserEntity implements User {
     description: '계정 생성 시각',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    nullable: true,
+    required: false,
+    description: '예매 내역',
+  })
+  reservations?: ReservationEntity[];
 }

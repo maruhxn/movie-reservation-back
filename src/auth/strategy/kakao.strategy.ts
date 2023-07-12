@@ -5,15 +5,17 @@ import {
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Prisma, ProviderType } from '@prisma/client';
+import { ProviderType } from '@prisma/client';
 import { Strategy } from 'passport-kakao';
 import authConfig from 'src/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(
     private prisma: PrismaService,
+    private usersService: UsersService,
     @Inject(authConfig.KEY) private config: ConfigType<typeof authConfig>,
   ) {
     super({
@@ -24,11 +26,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
 
   async validate(accessToken, refreshToken, profile, done) {
     const profileJSON = profile._json;
-    const exUser = await this.prisma.user.findFirst({
-      where: {
-        email: profileJSON.kakao_account.email,
-      },
-    });
+    const exUser = await this.usersService.findByEmail(
+      profileJSON.kakao_account.email,
+    );
 
     if (exUser && exUser.provider === ProviderType.LOCAL)
       throw new UnprocessableEntityException(
@@ -37,15 +37,13 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
 
     if (!exUser) {
       const data = {
-        email: profileJSON.kakao_account.email,
-        image: profileJSON.properties.profile_image,
-        name: profile.displayName,
+        email: profileJSON.kakao_account.email as string,
+        image: profileJSON.properties.profile_image as string,
+        name: profile.displayName as string,
         snsId: profile.id + '',
         provider: ProviderType.KAKAO,
-      } as Prisma.UserCreateInput;
-      const kakaoUser = await this.prisma.user.create({
-        data,
-      });
+      };
+      const kakaoUser = await this.usersService.createUserWithKakao(data);
 
       const kakaoUserPayload = {
         email: kakaoUser.email,

@@ -15,6 +15,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { ScreenModule } from './screen/screen.module';
 import { SeatsModule } from './seats/seats.module';
+import { MovieschedulesModule } from './movieschedules/movieschedules.module';
+import { ReservationsModule } from './reservations/reservations.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { SeatsModule } from './seats/seats.module';
     UsersModule,
     ScreenModule,
     SeatsModule,
+    MovieschedulesModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

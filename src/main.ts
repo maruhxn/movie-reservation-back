@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -14,6 +14,7 @@ async function bootstrap() {
   const port = process.env.PORT || 8000;
   app.enableCors({ origin: 'http://localhost:3000', credentials: true });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);

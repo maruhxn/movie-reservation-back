@@ -1,9 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Screen } from '@prisma/client';
+import { MovieSchedule, Screen } from '@prisma/client';
+import { MoviescheduleEntity } from 'src/movieschedules/entities/movieschedule.entity';
+import { SeatEntity } from 'src/seats/entities/seat.entity';
 
 export class ScreenEntity implements Screen {
-  constructor(partial: Partial<ScreenEntity>) {
-    Object.assign(this, partial);
+  constructor({ seats, movieSchedules, ...data }: Partial<ScreenEntity>) {
+    Object.assign(this, data);
+
+    if (seats) this.seats = seats.map((seat) => new SeatEntity(seat));
+    if (movieSchedules)
+      this.movieSchedules = movieSchedules.map(
+        (movieSchedule) => new MoviescheduleEntity(movieSchedule),
+      );
   }
   @ApiProperty({
     description: '고유 상영관 아이디',
@@ -19,4 +27,20 @@ export class ScreenEntity implements Screen {
     description: '총 좌석 수',
   })
   seatAmt: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: () => SeatEntity,
+    isArray: true,
+  })
+  seats?: SeatEntity[];
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: () => MoviescheduleEntity,
+    isArray: true,
+  })
+  movieSchedules?: MovieSchedule[];
 }

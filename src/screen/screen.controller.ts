@@ -21,6 +21,7 @@ import { GetScreenResponse } from 'src/types/response/screen/get-screen.dto';
 import { IsAdminGuard } from 'src/users/guards/isAdmin.guard';
 import { CreateScreenDto } from './dto/create-screen.dto';
 import { UpdateScreenDto } from './dto/update-screen.dto';
+import { ScreenEntity } from './entities/screen.entity';
 import { ScreenService } from './screen.service';
 
 @ApiTags('Screen')
@@ -36,7 +37,9 @@ export class ScreenController {
   async create(
     @Body() createScreenDto: CreateScreenDto,
   ): Promise<GetScreenResponse> {
-    const screen = await this.screenService.create(createScreenDto);
+    const screen = new ScreenEntity(
+      await this.screenService.create(createScreenDto),
+    );
     return {
       ok: true,
       msg: `${screen.screenNum}(${screen.id}) - 상영관 생성`,
@@ -51,11 +54,12 @@ export class ScreenController {
   @ApiOkResponse({ type: GetAllScreensResponse })
   async findAll(): Promise<GetAllScreensResponse> {
     const screens = await this.screenService.findAll();
+    const results = screens.map((screen) => new ScreenEntity(screen));
     return {
       ok: true,
       msg: `모든 상영관 정보`,
       status: 200,
-      data: screens,
+      data: results,
     };
   }
 
@@ -63,8 +67,8 @@ export class ScreenController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '상영관 정보 가져오기' })
   @ApiOkResponse({ type: GetScreenResponse })
-  async findOne(@Param('id') id: string): Promise<GetScreenResponse> {
-    const screen = await this.screenService.findUnique(id);
+  async findById(@Param('id') id: string): Promise<GetScreenResponse> {
+    const screen = new ScreenEntity(await this.screenService.findById(id));
     return {
       ok: true,
       msg: `${screen.screenNum}(${screen.id}) - 상영관 정보`,
@@ -81,7 +85,9 @@ export class ScreenController {
     @Param('id') id: string,
     @Body() updateScreenDto: UpdateScreenDto,
   ): Promise<GetScreenResponse> {
-    const screen = await this.screenService.update(id, updateScreenDto);
+    const screen = new ScreenEntity(
+      await this.screenService.update(id, updateScreenDto),
+    );
     return {
       ok: true,
       msg: `${screen.screenNum}(${screen.id}) - 상영관 정보 업데이트`,
@@ -95,7 +101,7 @@ export class ScreenController {
   @ApiOperation({ summary: '상영관 정보 삭제' })
   @ApiCreatedResponse({ type: BaseResponse })
   async remove(@Param('id') id: string): Promise<BaseResponse> {
-    const screen = await this.screenService.remove(id);
+    const screen = new ScreenEntity(await this.screenService.deleteById(id));
     return {
       ok: true,
       msg: `${screen.screenNum}(${screen.id}) - 상영관 삭제`,

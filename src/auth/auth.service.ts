@@ -17,8 +17,8 @@ import authConfig from 'src/config/auth.config';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UserEntity } from 'src/users/entities/user.entity';
 import * as uuid from 'uuid';
-import { UserInfo } from '../types/user-info';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
@@ -52,8 +52,10 @@ export class AuthService {
     const signupVerifyToken = uuid.v1();
 
     await this.saveUser(createUserDto, signupVerifyToken);
-    await this.sendMemberJoinEmail(createUserDto.email, signupVerifyToken);
-    return;
+    return await this.sendMemberJoinEmail(
+      createUserDto.email,
+      signupVerifyToken,
+    );
   }
 
   async saveUser(
@@ -75,28 +77,17 @@ export class AuthService {
     const { signupVerifyToken } = verifyEmailDto;
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    const token = await this.prisma.token.findFirst({
-      where: {
-        createdAt: {
-          gte: oneDayAgo,
-        },
-        payload: signupVerifyToken,
-      },
-      include: {
-        user: true,
-      },
-    });
+    const token = await this.tokenRepository.findVerifiedTokenByPayload(
+      oneDayAgo,
+      signupVerifyToken,
+    );
 
     if (!token) throw new NotFoundException('토큰 정보가 존재하지 않습니다.');
 
     await this.usersService.update(token.userId, { isVerified: true });
 
     const payload = { userId: token.userId };
-    await this.prisma.token.deleteMany({
-      where: {
-        userId: token.userId,
-      },
-    });
+    await this.tokenRepository.deleteManyByUserId(token.userId);
     const accessToken = this.jwtService.sign(payload);
 
     return accessToken;
@@ -104,12 +95,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<string> {
     const { email, password } = loginDto;
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email,
-        provider: ProviderType.LOCAL,
-      },
-    });
+    const user = await this.usersService.findByEmail(email, ProviderType.LOCAL);
 
     if (!user) throw new NotFoundException('유저 정보가 존재하지 않습니다.');
 
@@ -125,12 +111,13 @@ export class AuthService {
     }
   }
   kakaoLogin(req: Request, res: Response): void {
-    const accessToken = this.jwtService.sign(req.user as UserInfo);
+    const payload = { userId: (req.user as UserEntity).id };
+    const accessToken = this.jwtService.sign(payload);
     return res.redirect(`${this.CLIENT_URL}/?accessToken=${accessToken}`);
   }
 
-  async deleteUser(user: UserInfo): Promise<void> {
-    await this.usersService.remove(user.id);
+  async deleteUser(user: UserEntity): Promise<void> {
+    await this.usersService.deleteById(user.id);
     return;
   }
 }

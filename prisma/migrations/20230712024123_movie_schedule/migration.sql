@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "MovieSchedule" ALTER COLUMN "movieId" DROP NOT NULL,
+ALTER COLUMN "screenId" DROP NOT NULL;

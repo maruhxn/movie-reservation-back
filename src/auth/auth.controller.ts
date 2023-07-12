@@ -19,7 +19,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoginResponse } from 'src/types/response/auth/login.dto';
 import { BaseResponse } from 'src/types/response/base-response.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { UserInfo } from '../types/user-info';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -115,7 +115,7 @@ export class AuthController {
   })
   @Delete('edit/delete')
   @UseGuards(AuthGuard())
-  async deleteUser(@GetUser() user: UserInfo): Promise<BaseResponse> {
+  async deleteUser(@GetUser() user: UserEntity): Promise<BaseResponse> {
     this.logger.log(`회원 탈퇴 - ${user.name}(${user.id})}`);
     await this.authService.deleteUser(user);
     return {

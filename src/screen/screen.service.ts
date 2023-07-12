@@ -13,9 +13,7 @@ export class ScreenService {
   ) {}
 
   async create(createScreenDto: CreateScreenDto) {
-    const screen = await this.screenRepository.create({
-      data: createScreenDto,
-    });
+    const screen = await this.screenRepository.create(createScreenDto);
 
     const seatsList = this.generateNumberSequence(screen.seatAmt, screen.id);
 
@@ -24,12 +22,16 @@ export class ScreenService {
     return screen;
   }
 
-  private generateNumberSequence(seatAmt, screenId) {
+  private generateNumberSequence(
+    seatAmt: number,
+    screenId: string,
+    startNumber = 0,
+  ) {
     const seatsList: CreateSeatDto[] = [];
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let count = 0;
+    let count = startNumber;
 
-    for (let i = 0; i < seatAmt; i++) {
+    for (let i = startNumber; i < seatAmt; i++) {
       const letterIndex = Math.floor(count / 10);
       const letter = alphabet[letterIndex];
       const number = count % 10;
@@ -46,23 +48,33 @@ export class ScreenService {
   }
 
   async findAll() {
-    return await this.screenRepository.findMany();
+    return await this.screenRepository.findAll();
   }
 
-  async findUnique(id: string) {
-    return await this.screenRepository.findUnique({ where: { id } });
+  async findById(id: string) {
+    return await this.screenRepository.findById(id);
   }
 
   async update(id: string, updateScreenDto: UpdateScreenDto) {
-    return await this.screenRepository.update({
-      where: { id },
-      data: updateScreenDto,
-    });
+    const screen = await this.findById(id);
+    const difference = updateScreenDto.seatAmt - screen.seats.length;
+    if (difference < 0) {
+      // seatAmt 양이 원래보다 줄어들면, 좌석을 이름 역순으로 삭제
+      const seatIds = await this.seatsService.findManyWithNames(difference);
+      await this.seatsService.deleteManyById(seatIds);
+    } else if (difference > 0) {
+      // seatAmt 양이 원래보다 늘어나면, 좌석을 이어서 추가
+      const seatsList = this.generateNumberSequence(
+        updateScreenDto.seatAmt,
+        screen.id,
+        screen.seats.length,
+      );
+      await this.seatsService.createMany(seatsList);
+    }
+    return await this.screenRepository.update(id, updateScreenDto);
   }
 
-  async remove(id: string) {
-    return await this.screenRepository.delete({
-      where: { id },
-    });
+  async deleteById(id: string) {
+    return await this.screenRepository.deleteById(id);
   }
 }

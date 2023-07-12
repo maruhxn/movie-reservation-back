@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -15,11 +14,25 @@ export class TokenRepository {
     });
   }
 
-  async findFirst(params: Prisma.TokenFindFirstArgs) {
-    return await this.prisma.token.findFirst(params);
+  async findVerifiedTokenByPayload(oneDayAgo: Date, signupVerifyToken: string) {
+    return await this.prisma.token.findFirst({
+      where: {
+        createdAt: {
+          gte: oneDayAgo,
+        },
+        payload: signupVerifyToken,
+      },
+      include: {
+        user: true,
+      },
+    });
   }
 
-  async deleteMany(parmas: Prisma.TokenDeleteManyArgs) {
-    return await this.prisma.token.deleteMany(parmas);
+  async deleteManyByUserId(userId: string) {
+    return await this.prisma.token.deleteMany({
+      where: {
+        userId,
+      },
+    });
   }
 }

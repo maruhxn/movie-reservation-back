@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { ProviderType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { UserInfo } from 'src/types/user-info';
+import { CreateKakaoUserDto } from './dto/create-kakao-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repository/users.repository';
@@ -10,77 +10,70 @@ import { UsersRepository } from './repository/users.repository';
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserInfo> {
+  async create(createUserDto: CreateUserDto) {
     const salt = await bcrypt.genSalt();
     const hashedPwd = await bcrypt.hash(createUserDto.password, salt);
 
     createUserDto.password = hashedPwd;
 
-    const user = await this.usersRepository.create({ data: createUserDto });
+    const user = await this.usersRepository.create(createUserDto);
 
-    const { password, ...result } = user;
-    return result as UserInfo;
+    return user;
   }
 
-  async findAll(): Promise<UserInfo[]> {
-    const users = await this.usersRepository.findMany();
-    const results: UserInfo[] = users.map((user) => {
-      const { password, ...result } = user;
-      return result as UserInfo;
-    });
-    return results;
+  async createUserWithKakao(createKakaoUserDto: CreateKakaoUserDto) {
+    const user = this.usersRepository.createKakaoUser(createKakaoUserDto);
+    return user;
   }
 
-  async findOne(id: string): Promise<UserInfo> {
-    const user = await this.usersRepository.findUnique({ where: { id } });
-    const { password, ...result } = user;
-    return result as UserInfo;
+  async findAll() {
+    const users = await this.usersRepository.findAll();
+    return users;
   }
 
-  async findUserOnRegister(
-    email: string,
-    name: string,
-    phone: string,
-  ): Promise<User> {
-    const exUser = await this.usersRepository.findFirst({
-      where: {
-        OR: [{ email }, { name }, { phone }],
-      },
-    });
+  async findById(id: string) {
+    const user = await this.usersRepository.findById(id);
+    return user;
+  }
+
+  async findByEmail(email: string, provider?: ProviderType) {
+    const user = await this.usersRepository.findByEmail(email, provider);
+    return user;
+  }
+
+  async findUserOnRegister(email: string, name: string, phone: string) {
+    const exUser = await this.usersRepository.findUserOnRegister(
+      email,
+      name,
+      phone,
+    );
 
     return exUser;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserInfo> {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt();
       const hashedPwd = await bcrypt.hash(updateUserDto.password, salt);
       updateUserDto.password = hashedPwd;
     }
 
-    const user = await this.usersRepository.update({
-      where: { id },
-      data: updateUserDto,
-    });
+    const user = await this.usersRepository.update(id, updateUserDto);
 
     if (!user) {
       throw new NotFoundException('유저가 존재하지 않습니다');
     }
 
-    const { password, ...result } = user;
-
-    return result as UserInfo;
+    return user;
   }
 
-  async remove(id: string): Promise<UserInfo> {
-    const user = await this.usersRepository.delete({ where: { id } });
+  async deleteById(id: string) {
+    const user = await this.usersRepository.deleteById(id);
 
     if (!user) {
       throw new NotFoundException('유저가 존재하지 않습니다');
     }
 
-    const { password, ...result } = user;
-
-    return result as UserInfo;
+    return user;
   }
 }

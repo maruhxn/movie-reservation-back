@@ -8,31 +8,35 @@ export class SeatsService {
   constructor(private seatsRepository: SeatsRepository) {}
 
   async create(createSeatDto: CreateSeatDto) {
-    return await this.seatsRepository.create({ data: createSeatDto });
+    return await this.seatsRepository.create(createSeatDto);
   }
 
   async createMany(createSeatDtos: CreateSeatDto[]) {
-    return await this.seatsRepository.createMany({ data: createSeatDtos });
+    return await this.seatsRepository.createMany(createSeatDtos);
   }
 
   async findAll() {
-    return await this.seatsRepository.findMany();
+    return await this.seatsRepository.findAll();
   }
 
-  async findUnique(id: string) {
-    return await this.seatsRepository.findUnique({ where: { id } });
+  async findById(id: string) {
+    return await this.seatsRepository.findById(id);
+  }
+
+  async findManyWithNames(difference: number) {
+    return await this.seatsRepository.findManyWithNames(difference);
   }
 
   async update(id: string, updateSeatDto: UpdateSeatDto) {
-    return await this.seatsRepository.update({
-      where: { id },
-      data: updateSeatDto,
-    });
+    return await this.seatsRepository.update(id, updateSeatDto);
   }
 
-  async remove(id: string) {
-    return await this.seatsRepository.delete({
-      where: { id },
-    });
+  async deleteById(id: string) {
+    return await this.seatsRepository.deleteById(id);
+  }
+
+  async deleteManyById(seatIds: { id: string }[]) {
+    const ids = seatIds.map((seat) => seat.id);
+    return await this.seatsRepository.deleteManyById(ids);
   }
 }

@@ -23,6 +23,7 @@ import { GetAllUsersResponse } from 'src/types/response/users/get-all-users.dto'
 import { GetUserResponse } from 'src/types/response/users/get-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserEntity } from './entities/user.entity';
 import { IsAdminGuard } from './guards/isAdmin.guard';
 import { UsersService } from './users.service';
 
@@ -41,7 +42,7 @@ export class UsersController {
   @ApiOperation({ summary: '어드민 - 유저 생성' })
   @ApiCreatedResponse({ type: GetAllUsersResponse })
   async create(@Body() createUserDto: CreateUserDto): Promise<GetUserResponse> {
-    const user = await this.usersService.create(createUserDto);
+    const user = new UserEntity(await this.usersService.create(createUserDto));
     this.logger.log(`${user.name}(${user.id}) - 유저 생성`);
     return {
       ok: true,
@@ -57,11 +58,12 @@ export class UsersController {
   @ApiOkResponse({ type: GetAllUsersResponse })
   async findAll(): Promise<GetAllUsersResponse> {
     const users = await this.usersService.findAll();
+    const results = users.map((user) => new UserEntity(user));
     return {
       ok: true,
       msg: `모든 유저 정보`,
       status: 200,
-      data: users,
+      data: results,
     };
   }
 
@@ -69,8 +71,8 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '어드민 - 유저 정보 가져오기' })
   @ApiOkResponse({ type: GetUserResponse })
-  async findOne(@Param('id') id: string): Promise<GetUserResponse> {
-    const user = await this.usersService.findOne(id);
+  async findById(@Param('id') id: string): Promise<GetUserResponse> {
+    const user = new UserEntity(await this.usersService.findById(id));
     return {
       ok: true,
       msg: `${user.name}(${user.id}) - 유저 정보`,
@@ -87,7 +89,9 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<GetUserResponse> {
-    const user = await this.usersService.update(id, updateUserDto);
+    const user = new UserEntity(
+      await this.usersService.update(id, updateUserDto),
+    );
     return {
       ok: true,
       msg: `${user.name}(${user.id}) - 유저 정보 업데이트`,
@@ -100,9 +104,9 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '어드민 - 유저 정보 삭제' })
   @ApiCreatedResponse({ type: BaseResponse })
-  async remove(@Param('id') id: string): Promise<BaseResponse> {
+  async deleteById(@Param('id') id: string): Promise<BaseResponse> {
     this.logger.log('유저 삭제');
-    const user = await this.usersService.remove(id);
+    const user = new UserEntity(await this.usersService.deleteById(id));
     return {
       ok: true,
       msg: `${user.name}(${user.id}) - 유저 삭제`,
