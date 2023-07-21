@@ -13,13 +13,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoginResponse } from 'src/types/response/auth/login.dto';
 import { BaseResponse } from 'src/types/response/base-response.dto';
+import { GetUserResponse } from 'src/types/response/users/get-user.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { UsersService } from './../users/users.service';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -31,6 +40,7 @@ export class AuthController {
   constructor(
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
+    private readonly usersService: UsersService,
     private readonly authService: AuthService,
   ) {}
 
@@ -46,6 +56,22 @@ export class AuthController {
     this.logger.log(`회원가입. Payload: ${JSON.stringify(dto)}`);
     await this.authService.register(dto);
     return { ok: true, status: 201, msg: '회원가입 성공' };
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '유저 정보 가져오기' })
+  @ApiOkResponse({ type: GetUserResponse })
+  @Get('')
+  async getUserInfo(@GetUser() user: UserEntity): Promise<GetUserResponse> {
+    const currentUser = new UserEntity(
+      await this.usersService.findById(user.id),
+    );
+    return {
+      ok: true,
+      msg: `${currentUser.name}(${currentUser.id}) - 유저 정보`,
+      status: 200,
+      data: currentUser,
+    };
   }
 
   @ApiOperation({ summary: '이메일 인증' })

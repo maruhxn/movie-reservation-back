@@ -11,7 +11,7 @@ import { ReservationRepository } from './repository/reservation.repository';
 export class ReservationsService {
   constructor(private reservationRepository: ReservationRepository) {}
   async create(userId: string, createReservationDto: CreateReservationDto) {
-    if (createReservationDto.personAmt !== createReservationDto.seats.length)
+    if (createReservationDto.personAmt !== createReservationDto.seatIds.length)
       throw new BadRequestException('인원 수에 맞도록 좌석을 선택해주세요');
     return await this.reservationRepository.createReservation(
       userId,
@@ -28,7 +28,7 @@ export class ReservationsService {
   }
 
   async update(id: string, updateReservationDto: UpdateReservationDto) {
-    if (updateReservationDto.personAmt !== updateReservationDto.seats.length)
+    if (updateReservationDto.personAmt !== updateReservationDto.seatIds.length)
       throw new BadRequestException('인원 수에 맞도록 좌석을 선택해주세요');
     const reservation = await this.reservationRepository.update(
       id,

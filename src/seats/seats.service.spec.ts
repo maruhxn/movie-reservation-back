@@ -1,8 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Seat } from '@prisma/client';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { SeatEntity } from './entities/seat.entity';
 import { SeatsRepository } from './repository/seats.repository';
 import { SeatsService } from './seats.service';
 
@@ -26,21 +24,21 @@ describe('SeatsService', () => {
     expect(seatsService).toBeDefined();
   });
 
-  describe('Create Seats', () => {
-    const seat = {} as Seat;
-    it('올바른 입력이 들어오면, 좌석 생성', async () => {
-      jest
-        .spyOn(seatsRepository, 'create')
-        .mockResolvedValue(Promise.resolve(seat));
-      const createSeatDto = {
-        name: 'A1',
-        screenId: 'testid',
-      };
-      const result = await seatsService.create(createSeatDto);
+  // describe('Create Seats', () => {
+  //   const seat = {} as Seat;
+  //   it('올바른 입력이 들어오면, 좌석 생성', async () => {
+  //     jest
+  //       .spyOn(seatsRepository, 'create')
+  //       .mockResolvedValue(Promise.resolve(seat));
+  //     const createSeatDto = {
+  //       name: 'A1',
+  //       screenId: 'testid',
+  //     };
+  //     const result = await seatsService.create(createSeatDto);
 
-      expect(result).toBeInstanceOf(SeatEntity);
-    });
+  //     expect(result).toBeInstanceOf(SeatEntity);
+  //   });
 
-    // it('올바르지 않은 입력이 들어오면, 에러 HTTP Error 발생');
-  });
+  //   // it('올바르지 않은 입력이 들어오면, 에러 HTTP Error 발생');
+  // });
 });

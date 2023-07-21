@@ -6,7 +6,7 @@ import {
   LoggerService,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { format, sub } from 'date-fns';
 import * as fs from 'fs';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -83,10 +83,9 @@ export class BatchService {
   }
 
   // @Cron('0 0 0 * * 1', { name: 'Update Weekly Boxoffice' })
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  @Timeout(1000)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async getMovies() {
-    // let showRange: IShowRange;
+    // 1-2 page(40개) 저장
     const startDate = sub(new Date(), {
       months: 1,
     });

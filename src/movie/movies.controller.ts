@@ -110,7 +110,7 @@ export class MoviesController {
   @Delete(':movieId')
   @ApiOperation({ summary: '어드민 - 영화 정보 삭제' })
   @ApiCreatedResponse({ type: BaseResponse })
-  async remove(@Param('movieId') movieId: string): Promise<BaseResponse> {
+  async deleteById(@Param('movieId') movieId: string): Promise<BaseResponse> {
     const movie = new MovieEntity(await this.moviesService.deleteById(movieId));
     this.logger.log(`${movie.title}(${movie.id}) - 영화 삭제`);
     return {

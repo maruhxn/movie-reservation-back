@@ -100,7 +100,7 @@ export class ScreenController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '상영관 정보 삭제' })
   @ApiCreatedResponse({ type: BaseResponse })
-  async remove(@Param('id') id: string): Promise<BaseResponse> {
+  async deleteById(@Param('id') id: string): Promise<BaseResponse> {
     const screen = new ScreenEntity(await this.screenService.deleteById(id));
     return {
       ok: true,

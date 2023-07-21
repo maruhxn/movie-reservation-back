@@ -13,14 +13,14 @@ export class ReservationRepository {
     createReservationDto: CreateReservationDto,
   ) {
     console.log(createReservationDto, userId);
-    const { movieScheduleId, personAmt, seats } = createReservationDto;
+    const { movieScheduleId, personAmt, seatIds } = createReservationDto;
     const reservation = await this.prisma.reservation.create({
       data: {
         personAmt,
         movieScheduleId,
         userId,
         seats: {
-          connect: seats.map((id) => ({ id })),
+          connect: seatIds.map((id) => ({ id })),
         },
       },
       include: {
@@ -47,7 +47,7 @@ export class ReservationRepository {
   }
 
   async update(id: string, updateReservationDto: UpdateReservationDto) {
-    const { personAmt, movieScheduleId, seats } = updateReservationDto;
+    const { personAmt, movieScheduleId, seatIds } = updateReservationDto;
     return await this.prisma.reservation.update({
       where: { id },
       include: { movieSchedule: true, user: true, seats: true },
@@ -55,7 +55,7 @@ export class ReservationRepository {
         movieScheduleId,
         personAmt,
         seats: {
-          connect: seats.map((id) => ({ id })),
+          connect: seatIds.map((id) => ({ id })),
         },
       },
     });

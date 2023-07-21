@@ -7,5 +7,6 @@ import { BatchService } from './batch.service';
 @Module({
   imports: [HttpModule, ScheduleModule.forRoot(), MoviesModule],
   providers: [BatchService],
+  exports: [BatchService],
 })
 export class BatchModule {}

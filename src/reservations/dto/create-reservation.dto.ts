@@ -21,5 +21,5 @@ export class CreateReservationDto {
   })
   @IsArray()
   @IsString({ each: true })
-  seats: string[];
+  seatIds: string[];
 }

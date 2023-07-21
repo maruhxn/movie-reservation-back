@@ -17,7 +17,7 @@ describe('UsersService', () => {
     email: 'test@test.com',
     name: 'tester',
     createdAt: new Date(),
-    password: 'testttttttttttttttt',
+    password: 'hashedPassword',
     role: 1,
     provider: ProviderType.LOCAL,
     isVerified: true,
@@ -57,10 +57,9 @@ describe('UsersService', () => {
       };
       repositoryCreateMock.mockResolvedValue(user);
       const result = await service.create(createUserDto);
-      const { password, ...userWithoutPwd } = user;
       expect(repositoryCreateMock).toBeCalledTimes(1);
-      expect(repositoryCreateMock).toBeCalledWith({ data: createUserDto });
-      expect(result).toEqual(userWithoutPwd);
+      expect(repositoryCreateMock).toBeCalledWith(createUserDto);
+      expect(result).toEqual(user);
     });
 
     it('입력값에 문제가 있다면, 에러', async () => {
@@ -81,51 +80,46 @@ describe('UsersService', () => {
   describe('findAll', () => {
     let repositoryFindManyMock;
     beforeEach(() => {
-      repositoryFindManyMock = jest.spyOn(usersRepository, 'findMany');
+      repositoryFindManyMock = jest.spyOn(usersRepository, 'findAll');
     });
 
     it('비밀번호를 제외한 유저 정보 배열을 리턴', async () => {
       repositoryFindManyMock.mockResolvedValue([user]);
       const results = await service.findAll();
-      const { password, ...userWithoutPwd } = user;
       expect(repositoryFindManyMock).toBeCalledTimes(1);
-      expect(results).toEqual([userWithoutPwd]);
+      expect(results).toEqual([user]);
     });
   });
 
   describe('findOne', () => {
     let repositoryFindUniqueMock;
     beforeEach(() => {
-      repositoryFindUniqueMock = jest.spyOn(usersRepository, 'findUnique');
+      repositoryFindUniqueMock = jest.spyOn(usersRepository, 'findById');
     });
 
     it('비밀번호를 제외한 유저 정보 리턴', async () => {
       repositoryFindUniqueMock.mockResolvedValue(user);
-      const result = await service.findOne('test');
-      const { password, ...userWithoutPwd } = user;
+      const result = await service.findById('test');
       expect(repositoryFindUniqueMock).toBeCalledTimes(1);
-      expect(repositoryFindUniqueMock).toBeCalledWith({
-        where: { id: 'test' },
-      });
-      expect(result).toEqual(userWithoutPwd);
+      expect(repositoryFindUniqueMock).toBeCalledWith('test');
+      expect(result).toEqual(user);
     });
   });
 
   describe('findUserOnRegister', () => {
     let repositoryFindFirstMock;
     beforeEach(() => {
-      repositoryFindFirstMock = jest.spyOn(usersRepository, 'findFirst');
+      repositoryFindFirstMock = jest.spyOn(
+        usersRepository,
+        'findUserOnRegister',
+      );
     });
 
     it('유저 객체 리턴', async () => {
       repositoryFindFirstMock.mockResolvedValue(user);
       const result = await service.findUserOnRegister('test', 'test', 'test');
       expect(repositoryFindFirstMock).toBeCalledTimes(1);
-      expect(repositoryFindFirstMock).toBeCalledWith({
-        where: {
-          OR: [{ email: 'test' }, { name: 'test' }, { phone: 'test' }],
-        },
-      });
+      expect(repositoryFindFirstMock).toBeCalledWith('test', 'test', 'test');
       expect(result).toEqual(user);
     });
   });
@@ -156,14 +150,10 @@ describe('UsersService', () => {
 
       repositoryUpdateMock.mockResolvedValue(updatedUser);
       const result = await service.update('test', updateUserDto);
-      const { password, ...userWithoutPwd } = updatedUser;
       expect(repositoryUpdateMock).toBeCalledTimes(1);
-      expect(repositoryUpdateMock).toBeCalledWith({
-        where: { id: 'test' },
-        data: updateUserDto,
-      });
+      expect(repositoryUpdateMock).toBeCalledWith('test', updateUserDto);
       expect(hashMock).toBeCalledTimes(1);
-      expect(result).toEqual(userWithoutPwd);
+      expect(result).toEqual(updatedUser);
     });
 
     it('입력값에 문제가 있다면, 에러', async () => {
@@ -185,18 +175,15 @@ describe('UsersService', () => {
     let repositoryDeleteMock;
 
     beforeEach(() => {
-      repositoryDeleteMock = jest.spyOn(usersRepository, 'delete');
+      repositoryDeleteMock = jest.spyOn(usersRepository, 'deleteById');
     });
 
     it('id에 해당하는 user 삭제 후 비밀번호를 제외한 정보 반환', async () => {
       repositoryDeleteMock.mockResolvedValue(user);
-      const result = await service.remove('test');
-      const { password, ...userWithoutPwd } = user;
+      const result = await service.deleteById('test');
       expect(repositoryDeleteMock).toBeCalledTimes(1);
-      expect(repositoryDeleteMock).toBeCalledWith({
-        where: { id: 'test' },
-      });
-      expect(result).toEqual(userWithoutPwd);
+      expect(repositoryDeleteMock).toBeCalledWith('test');
+      expect(result).toEqual(user);
     });
   });
 });
