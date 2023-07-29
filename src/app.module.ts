@@ -16,6 +16,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { ScreenModule } from './screen/screen.module';
 import { SeatsModule } from './seats/seats.module';
 import { UsersModule } from './users/users.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UsersModule } from './users/users.module';
     SeatsModule,
     MovieschedulesModule,
     ReservationsModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [DBInitializerService],

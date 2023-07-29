@@ -18,6 +18,20 @@ export class MoviesRepository {
     });
   }
 
+  async findManyByQuery(q: string) {
+    return await this.prisma.movie.findMany({
+      where: {
+        title: {
+          startsWith: q,
+        },
+      },
+      include: {
+        _count: true,
+      },
+      take: 5,
+    });
+  }
+
   async findFirst(params: Prisma.MovieFindFirstArgs) {
     return await this.prisma.movie.findFirst(params);
   }

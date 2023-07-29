@@ -28,6 +28,10 @@ export class MoviesService {
     return movie;
   }
 
+  async findManyByQuery(q: string) {
+    return await this.moviesRepository.findManyByQuery(q);
+  }
+
   async findByOrderFilter(filterDto?: FilterDto) {
     // 인기도, 개봉일, 평점, 제목 순으로 정렬.
     const { condition, sort } = filterDto;

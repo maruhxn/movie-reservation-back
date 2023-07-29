@@ -22,7 +22,6 @@ import { GetAllReservationsResponse } from 'src/types/response/reservations/get-
 import { GetReservationResponse } from 'src/types/response/reservations/get-reservation.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { IsAdminGuard } from 'src/users/guards/isAdmin.guard';
-import { ScreenService } from './../screen/screen.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
@@ -32,10 +31,7 @@ import { ReservationsService } from './reservations.service';
 @ApiTags('Reservations')
 @Controller('reservations')
 export class ReservationsController {
-  constructor(
-    private readonly reservationsService: ReservationsService,
-    private readonly screenService: ScreenService,
-  ) {}
+  constructor(private readonly reservationsService: ReservationsService) {}
 
   @Post()
   @ApiBearerAuth()
