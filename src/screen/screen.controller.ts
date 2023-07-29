@@ -24,8 +24,8 @@ import { UpdateScreenDto } from './dto/update-screen.dto';
 import { ScreenEntity } from './entities/screen.entity';
 import { ScreenService } from './screen.service';
 
-@ApiTags('Screen')
-@Controller('screen')
+@ApiTags('Screens')
+@Controller('screens')
 @UseGuards(IsAdminGuard)
 export class ScreenController {
   constructor(private readonly screenService: ScreenService) {}

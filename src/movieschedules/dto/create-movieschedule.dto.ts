@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsDate, IsString } from 'class-validator';
 
 export class CreateMoviescheduleDto {
   @ApiProperty({ description: '영화 아이디' })
@@ -13,20 +14,16 @@ export class CreateMoviescheduleDto {
   screenId: string;
 
   @ApiProperty({
-    description: '상영일',
-  })
-  @IsString()
-  startDate: string;
-
-  @ApiProperty({
     description: '상영 시간',
   })
-  @IsString()
-  startTm: string;
+  @Transform((x) => new Date(x.value))
+  @IsDate()
+  startTm: Date;
 
   @ApiProperty({
     description: '종료 시간',
   })
-  @IsString()
-  endTm: string;
+  @Transform((x) => new Date(x.value))
+  @IsDate()
+  endTm: Date;
 }

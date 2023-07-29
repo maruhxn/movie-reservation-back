@@ -38,39 +38,40 @@ model Token {
   id        String   @id @default(uuid())
   payload   String
   createdAt DateTime @default(now())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Reservation {
-  id        String  @id @default(cuid())
-  personAmt Int
-  
-  userId    String?
-  user      User?   @relation(fields: [userId], references: [id])
+  id        String @id @default(cuid())
+  personAmt Int @db.SmallInt
 
-  movieScheduleId String?        @unique
-  movieSchedule   MovieSchedule? @relation(fields: [movieScheduleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  seats Seat[]
+  movieScheduleId String
+  movieSchedule   MovieSchedule @relation(fields: [movieScheduleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  seatIds String[]
+  seatNames String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id])
+  @@index([id, movieScheduleId, seatIds])
 }
 
 model MovieSchedule {
-  id      String @id @default(uuid())
-  movieId String?
-  movie   Movie?  @relation(fields: [movieId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  id      String  @id @default(uuid())
 
-  screenId String?  @unique
-  screen   Screen? @relation(fields: [screenId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  movieId String
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  startDate String
-  startTm   String
-  endTm     String
+  screenId String
+  screen   Screen @relation(fields: [screenId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  startTm DateTime
+  endTm   DateTime
 
   reservations Reservation[]
 }
@@ -97,9 +98,9 @@ model Movie {
 }
 
 model Screen {
-  id        String @id @default(cuid())
-  screenNum Int @unique
-  seatAmt   Int
+  id          String @id @default(cuid())
+  screenNum   Int    @unique @db.SmallInt
+  seatAmt     Int    @db.SmallInt
 
   movieSchedules MovieSchedule[]
   seats          Seat[]
@@ -109,9 +110,6 @@ model Seat {
   id   String @id @default(cuid())
   name String
 
-  reservationId String?
-  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-
-  screenId String?
-  screen   Screen? @relation(fields: [screenId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  screenId String
+  screen   Screen @relation(fields: [screenId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

@@ -9,5 +9,6 @@ import { ScreenService } from './screen.service';
   imports: [PrismaModule, SeatsModule],
   controllers: [ScreenController],
   providers: [ScreenService, ScreenRepository],
+  exports: [ScreenService],
 })
 export class ScreenModule {}

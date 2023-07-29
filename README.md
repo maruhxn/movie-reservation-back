@@ -59,3 +59,9 @@ v1.0.0
 - E2E Test []
 - redis 적용 (movie 정보? moveiSchedule 정보?를 받아두자.)
 - Transaction 적용
+
+## 고민사항..
+
+- 기존 테이블 구조에서 seat와 reservation 테이블이 one to many로 연결되어 있었음.. 그래서 같은 영화 및 상영관이고 시간대만 다른 경우에도 상영관이 좌석을 공유하기에 seat에 reservationId가 있다면 이미 예매 완료 상태가 되어버림.. 어떻게 해결해야할까?
+  => seat와 reservation 사이의 relation을 삭제. 이후 reservation에서 seat를 참조할 수 있게 seatIds라는 string 배열을 저장함. movieShcedule을 선택하여 상영관의 좌석을 보여줄 때, movieScedule.screen.seats를 모두 보여주고, movieScedule.reservations.seatIds를 순회하여 해당하는 것이 있다면 좌석을 선택할 수 없도록 만들자. (클라에서? 서버에서?) 남은 좌석을 보여주는 것은 movieSchedule.screen.seatAmt - movieSchedule.reservations.map(reservation => seatIds.length) 를 통해 계산하여 보여주면 될것.
+  => 근데 이러면 movieSchedule을 선택할 때마다 너무 많은 연산이 필요하게 됨.. index, 캐싱, 클라에게 양도가 필요할듯.

@@ -44,6 +44,14 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
           error: exception.meta.cause,
         });
       }
+      case 'P2003': {
+        const status = HttpStatus.BAD_REQUEST;
+        return res.status(status).json({
+          statusCode: status,
+          message: 'Invalid ID',
+          error: exception.meta.cause,
+        });
+      }
       default:
         // default 500 error code
         super.catch(exception, host);

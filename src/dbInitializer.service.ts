@@ -6,6 +6,6 @@ export class DBInitializerService implements OnApplicationBootstrap {
   constructor(private readonly batchService: BatchService) {}
 
   onApplicationBootstrap() {
-    process.env.NODE_ENV !== 'test' && this.batchService.getMovies();
+    process.env.NODE_ENV !== 'development' && this.batchService.getMovies();
   }
 }

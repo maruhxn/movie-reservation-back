@@ -58,6 +58,7 @@ export class AuthController {
     return { ok: true, status: 201, msg: '회원가입 성공' };
   }
 
+  @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @ApiOperation({ summary: '유저 정보 가져오기' })
   @ApiOkResponse({ type: GetUserResponse })

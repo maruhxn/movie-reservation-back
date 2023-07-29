@@ -22,4 +22,11 @@ export class CreateReservationDto {
   @IsArray()
   @IsString({ each: true })
   seatIds: string[];
+
+  @ApiProperty({
+    description: '예약할 좌석이름 리스트',
+  })
+  @IsArray()
+  @IsString({ each: true })
+  seatNames: string[];
 }

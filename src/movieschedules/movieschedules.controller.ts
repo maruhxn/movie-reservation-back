@@ -27,7 +27,7 @@ import { MoviescheduleEntity } from './entities/movieschedule.entity';
 import { MovieschedulesService } from './movieschedules.service';
 
 @ApiTags('Movie Shcedules')
-@Controller('movieschedules')
+@Controller('movie-schedules')
 export class MovieschedulesController {
   constructor(private readonly movieschedulesService: MovieschedulesService) {}
 
@@ -37,7 +37,6 @@ export class MovieschedulesController {
   @ApiOperation({ summary: '어드민 - 영화 스케쥴 생성' })
   @ApiCreatedResponse({ type: GetMovieScheduleResponse })
   async create(@Body() dto: CreateMoviescheduleDto) {
-    console.log(dto);
     const movieSchedule = new MoviescheduleEntity(
       await this.movieschedulesService.create(dto),
     );
@@ -50,13 +49,22 @@ export class MovieschedulesController {
   }
 
   @Get()
-  @ApiQuery({ example: { startDate: '2023-01-01' } })
+  @ApiQuery({ name: '영화 시작 시각' })
   @ApiOperation({ summary: '해당일의 모든 영화 스케쥴 정보 가져오기' })
   @ApiOkResponse({ type: GetAllMovieScheduleResponse })
-  async findAllByDate(@Query('startDate') startDate: string) {
-    const movieSchedules = await this.movieschedulesService.findAllByDate(
-      startDate,
-    );
+  async findAll(
+    @Query('startTm') startTm?: string,
+    @Query('movieId') movieId?: string,
+  ) {
+    let movieSchedules;
+    if (startTm) {
+      movieSchedules = await this.movieschedulesService.findAllByDate(
+        startTm,
+        movieId,
+      );
+    } else {
+      movieSchedules = await this.movieschedulesService.findAll();
+    }
 
     const results = movieSchedules.map(
       (movieSchedule) => new MoviescheduleEntity(movieSchedule),

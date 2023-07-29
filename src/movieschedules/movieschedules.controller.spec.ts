@@ -17,9 +17,8 @@ describe('MovieschedulesController', () => {
     id: 'movieScheduleId',
     movieId: 'movieId',
     screenId: 'screenId',
-    startDate: '2023-07-21',
-    startTm: '13:00',
-    endTm: '15:30',
+    startTm: new Date(),
+    endTm: new Date(),
     movie: {} as Movie,
     screen: {} as Screen,
     reservations: [] as Reservation[],
@@ -46,9 +45,8 @@ describe('MovieschedulesController', () => {
       const dto: CreateMoviescheduleDto = {
         movieId: 'movieId',
         screenId: 'screenId',
-        startDate: '2023-07-21',
-        startTm: '13:00',
-        endTm: '15:30',
+        startTm: new Date(),
+        endTm: new Date(),
       };
 
       jest.spyOn(service, 'create').mockResolvedValue(movieSchedule);
@@ -71,11 +69,11 @@ describe('MovieschedulesController', () => {
   });
 
   describe('findAll', () => {
-    const startDate = '2023-07-21';
+    const startTm = '';
     it('모든 영화 스케쥴 정보 정보를 받아와 movieScheduleEntity 배열로 반환', async () => {
       jest.spyOn(service, 'findAllByDate').mockResolvedValue([movieSchedule]);
 
-      const result = await controller.findAllByDate(startDate);
+      const result = await controller.findAll(startTm);
       const movieSchedules = result.data;
       expect(movieSchedules).toBeInstanceOf(Array);
       const allmovieSchedulesAreInstanceOfmovieScheduleEntity =
@@ -97,7 +95,7 @@ describe('MovieschedulesController', () => {
   describe('update', () => {
     it('입력값이 올바르다면', async () => {
       const dto: UpdateMoviescheduleDto = {
-        startDate: '2023-07-23',
+        startTm: new Date(),
       };
 
       const updatedmovieSchedule = {
